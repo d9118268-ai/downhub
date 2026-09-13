@@ -51,11 +51,25 @@ export async function GET(request: NextRequest) {
 
     const buffer = await response.arrayBuffer();
 
+    const mediaType = contentType.split(";")[0].trim();
+    const extensionMap: Record<string, string> = {
+      "video/mp4": "mp4",
+      "video/webm": "webm",
+      "video/quicktime": "mov",
+      "video/x-msvideo": "avi",
+      "audio/mpeg": "mp3",
+      "audio/wav": "wav",
+      "audio/ogg": "ogg",
+      "audio/mp4": "m4a",
+    };
+
+    const extension = extensionMap[mediaType] || "bin";
+
     return new NextResponse(buffer, {
       status: 200,
       headers: {
         "Content-Type": contentType,
-        "Content-Disposition": 'attachment; filename="downhub-media"',
+        "Content-Disposition": `attachment; filename="downhub-media.${extension}"`,
       },
     });
   } catch {
