@@ -1,32 +1,43 @@
 "use client";
 
 import { useState } from "react";
-
+import {
+  siYoutube,
+  siTiktok,
+  siInstagram,
+  siFacebook,
+  siSnapchat,
+} from "simple-icons";
 const platforms = [
   {
     name: "YouTube",
     description: "Download videos from YouTube",
     color: "from-red-500 to-red-600",
+    icon: siYoutube,
   },
   {
     name: "TikTok",
     description: "Download TikTok videos",
     color: "from-black to-gray-700",
+    icon: siTiktok,
   },
   {
     name: "Instagram",
     description: "Download Instagram videos",
     color: "from-pink-500 to-purple-600",
+    icon: siInstagram,
   },
   {
     name: "Facebook",
     description: "Download Facebook videos",
     color: "from-blue-500 to-blue-700",
+    icon: siFacebook,
   },
   {
     name: "Snapchat",
     description: "Download Snapchat videos",
     color: "from-yellow-400 to-yellow-500",
+    icon: siSnapchat,
   },
 ];
 
