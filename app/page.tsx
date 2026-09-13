@@ -153,7 +153,13 @@ export default function Home() {
                 <div
                   className={`mb-5 flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br ${platform.color} font-bold`}
                 >
-                  {platform.name.charAt(0)}
+                  <svg
+  viewBox="0 0 24 24"
+  className="h-7 w-7 fill-current"
+  aria-hidden="true"
+>
+  <path d={platform.icon.path} />
+</svg>
                 </div>
 
                 <h3 className="font-semibold">{platform.name} Downloader</h3>
