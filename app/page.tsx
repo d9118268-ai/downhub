@@ -124,10 +124,21 @@ export default function Home() {
 
           <div className="mt-10 grid gap-5 sm:grid-cols-2 lg:grid-cols-5">
             {platforms.map((platform) => (
-              <div
-                key={platform.name}
-                className="group rounded-2xl border border-white/10 bg-slate-950 p-6 transition hover:-translate-y-1 hover:border-white/20"
-              >
+<a
+  key={platform.name}
+  href={
+    platform.name === "YouTube"
+      ? "/youtube-video-downloader"
+      : platform.name === "TikTok"
+      ? "/tiktok-video-downloader"
+      : platform.name === "Instagram"
+      ? "/instagram-video-downloader"
+      : platform.name === "Facebook"
+      ? "/facebook-video-downloader"
+      : "/snapchat-video-downloader"
+  }
+  className="group rounded-2xl border border-white/10 bg-slate-950 p-6 transition hover:-translate-y-1 hover:border-blue-500/40"
+>
                 <div
                   className={`mb-5 flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br ${platform.color} font-bold`}
                 >
@@ -139,7 +150,7 @@ export default function Home() {
                 <p className="mt-2 text-sm leading-6 text-slate-500">
                   {platform.description}
                 </p>
-              </div>
+              </a>
             ))}
           </div>
         </div>
