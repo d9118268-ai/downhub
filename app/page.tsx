@@ -1,4 +1,3 @@
-```tsx
 "use client";
 
 import { useState } from "react";
@@ -9,7 +8,6 @@ import {
   siFacebook,
   siSnapchat,
 } from "simple-icons";
-
 const platforms = [
   {
     name: "YouTube",
@@ -45,84 +43,7 @@ const platforms = [
 
 export default function Home() {
   const [url, setUrl] = useState("");
-  const [error, setError] = useState("");
-  const [message, setMessage] = useState("");
-  const [loading, setLoading] = useState(false);
-
-  const handleDownload = async () => {
-    const trimmedUrl = url.trim();
-
-    setError("");
-    setMessage("");
-
-    if (!trimmedUrl) {
-      setError("Please paste a video URL.");
-      return;
-    }
-
-    let parsedUrl: URL;
-
-    try {
-      parsedUrl = new URL(trimmedUrl);
-    } catch {
-      setError("Please enter a valid URL.");
-      return;
-    }
-
-    if (!["http:", "https:"].includes(parsedUrl.protocol)) {
-      setError("Please enter a valid HTTP or HTTPS URL.");
-      return;
-    }
-
-    setLoading(true);
-
-    try {
-      const response = await fetch(
-        `/api/download?url=${encodeURIComponent(trimmedUrl)}`
-      );
-
-      const contentType = response.headers.get("content-type") || "";
-
-      // Direct media files are returned as a download.
-      if (
-        contentType.startsWith("video/") ||
-        contentType.startsWith("audio/")
-      ) {
-        const blob = await response.blob();
-        const downloadUrl = URL.createObjectURL(blob);
-
-        const link = document.createElement("a");
-        link.href = downloadUrl;
-        link.download = "downhub-media";
-        document.body.appendChild(link);
-        link.click();
-        link.remove();
-
-        URL.revokeObjectURL(downloadUrl);
-        return;
-      }
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        setError(data.error || "Something went wrong.");
-        return;
-      }
-
-      if (data.type === "platform") {
-        setMessage(
-          `${data.platform} detected. Platform media processing is not enabled yet.`
-        );
-        return;
-      }
-
-      setError(data.error || "Unable to process this URL.");
-    } catch {
-      setError("Unable to connect to the download service.");
-    } finally {
-      setLoading(false);
-    }
-  };
+const [error, setError] = useState("");
 
   return (
     <main className="min-h-screen bg-slate-950 text-white">
@@ -162,9 +83,7 @@ export default function Home() {
 
         <h1 className="text-4xl font-bold tracking-tight sm:text-6xl">
           Download Videos
-          <span className="block text-blue-500">
-            From Your Favorite Platforms
-          </span>
+          <span className="block text-blue-500">From Your Favorite Platforms</span>
         </h1>
 
         <p className="mx-auto mt-6 max-w-2xl text-lg leading-8 text-slate-400">
@@ -178,41 +97,95 @@ export default function Home() {
             <input
               type="url"
               value={url}
-              onChange={(e) => {
-                setUrl(e.target.value);
-                setError("");
-                setMessage("");
-              }}
-              onKeyDown={(e) => {
-                if (e.key === "Enter") {
-                  handleDownload();
-                }
-              }}
+              onChange={(e) => setUrl(e.target.value)}
               placeholder="Paste video URL here..."
               className="min-w-0 flex-1 rounded-xl bg-slate-900 px-5 py-4 text-white outline-none placeholder:text-slate-500 focus:ring-2 focus:ring-blue-500"
             />
 
-            <button
-              disabled={!url.trim() || loading}
-              onClick={handleDownload}
-              className="rounded-xl bg-blue-600 px-7 py-4 font-semibold transition hover:bg-blue-500 disabled:cursor-not-allowed disabled:opacity-50"
-            >
-              {loading ? "Checking..." : "Download"}
-            </button>
+<button
+  disabled={!url.trim()}
+  onClick={() => {
+    const trimmedUrl = url.trim();
+
+    if (!trimmedUrl) {
+      setError("Please paste a video URL.");
+      return;
+    }
+
+    let parsedUrl: URL;
+
+    try {
+      parsedUrl = new URL(trimmedUrl);
+    } catch {
+      setError("Please enter a valid URL.");
+      return;
+    }
+
+    if (!["http:", "https:"].includes(parsedUrl.protocol)) {
+      setError("Please enter a valid HTTP or HTTPS URL.");
+      return;
+    }
+
+    const hostname = parsedUrl.hostname.toLowerCase();
+
+    const supportedPlatforms = [
+      "youtube.com",
+      "youtu.be",
+      "tiktok.com",
+      "instagram.com",
+      "facebook.com",
+      "fb.watch",
+      "snapchat.com",
+    ];
+
+    const isSupportedPlatform = supportedPlatforms.some(
+      (platform) =>
+        hostname === platform || hostname.endsWith(`.${platform}`)
+    );
+
+    const mediaExtensions = [
+      ".mp4",
+      ".webm",
+      ".mov",
+      ".avi",
+      ".mkv",
+      ".mp3",
+      ".wav",
+      ".ogg",
+      ".m4a",
+    ];
+
+    const isDirectMedia = mediaExtensions.some((extension) =>
+      parsedUrl.pathname.toLowerCase().endsWith(extension)
+    );
+
+    if (!isSupportedPlatform && !isDirectMedia) {
+      setError(
+        "Unsupported URL. Use a supported platform URL or a direct media URL."
+      );
+      return;
+    }
+
+    setError("");
+
+    window.location.href = `/api/download?url=${encodeURIComponent(
+      trimmedUrl
+    )}`;
+  }}
+  className="rounded-xl bg-blue-600 px-7 py-4 font-semibold transition hover:bg-blue-500 disabled:cursor-not-allowed disabled:opacity-50"
+>
+  Download
+</button>
           </div>
 
-          {error && (
-            <p className="px-3 pt-3 text-left text-sm text-red-400">
-              {error}
-            </p>
-          )}
-
-          {message && (
-            <p className="px-3 pt-3 text-left text-sm text-blue-400">
-              {message}
-            </p>
-          )}
+      {error && (
+  <p className="mt-4 text-sm text-red-400">
+    {error}
+  </p>
+)}
         </div>
+
+
 
         <p className="mt-4 text-xs text-slate-500">
           Only download content you own or have permission to download.
@@ -220,10 +193,7 @@ export default function Home() {
       </section>
 
       {/* Platforms */}
-      <section
-        id="platforms"
-        className="border-y border-white/10 bg-slate-900/50"
-      >
+      <section id="platforms" className="border-y border-white/10 bg-slate-900/50">
         <div className="mx-auto max-w-7xl px-6 py-20">
           <div className="text-center">
             <h2 className="text-3xl font-bold">
@@ -237,36 +207,34 @@ export default function Home() {
 
           <div className="mt-10 grid gap-5 sm:grid-cols-2 lg:grid-cols-5">
             {platforms.map((platform) => (
-              <a
-                key={platform.name}
-                href={
-                  platform.name === "YouTube"
-                    ? "/youtube-video-downloader"
-                    : platform.name === "TikTok"
-                    ? "/tiktok-video-downloader"
-                    : platform.name === "Instagram"
-                    ? "/instagram-video-downloader"
-                    : platform.name === "Facebook"
-                    ? "/facebook-video-downloader"
-                    : "/snapchat-video-downloader"
-                }
-                className="group rounded-2xl border border-white/10 bg-slate-950 p-6 transition hover:-translate-y-1 hover:border-blue-500/40"
-              >
+<a
+  key={platform.name}
+  href={
+    platform.name === "YouTube"
+      ? "/youtube-video-downloader"
+      : platform.name === "TikTok"
+      ? "/tiktok-video-downloader"
+      : platform.name === "Instagram"
+      ? "/instagram-video-downloader"
+      : platform.name === "Facebook"
+      ? "/facebook-video-downloader"
+      : "/snapchat-video-downloader"
+  }
+  className="group rounded-2xl border border-white/10 bg-slate-950 p-6 transition hover:-translate-y-1 hover:border-blue-500/40"
+>
                 <div
                   className={`mb-5 flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br ${platform.color} font-bold`}
                 >
                   <svg
-                    viewBox="0 0 24 24"
-                    className="h-7 w-7 fill-current"
-                    aria-hidden="true"
-                  >
-                    <path d={platform.icon.path} />
-                  </svg>
+  viewBox="0 0 24 24"
+  className="h-7 w-7 fill-current"
+  aria-hidden="true"
+>
+  <path d={platform.icon.path} />
+</svg>
                 </div>
 
-                <h3 className="font-semibold">
-                  {platform.name} Downloader
-                </h3>
+                <h3 className="font-semibold">{platform.name} Downloader</h3>
 
                 <p className="mt-2 text-sm leading-6 text-slate-500">
                   {platform.description}
@@ -303,10 +271,7 @@ export default function Home() {
       </section>
 
       {/* FAQ */}
-      <section
-        id="faq"
-        className="border-t border-white/10 bg-slate-900/50"
-      >
+      <section id="faq" className="border-t border-white/10 bg-slate-900/50">
         <div className="mx-auto max-w-4xl px-6 py-20">
           <h2 className="text-center text-3xl font-bold">
             Frequently Asked Questions
@@ -359,9 +324,10 @@ export default function Home() {
 
       {/* Footer */}
       <footer className="border-t border-white/10 px-6 py-8 text-center text-sm text-slate-500">
-        <p>Developed By : David Ayomide copyright 2026</p>
+        <p>
+          Developed By : David Ayomide copyright 2026
+        </p>
       </footer>
     </main>
   );
 }
-```
